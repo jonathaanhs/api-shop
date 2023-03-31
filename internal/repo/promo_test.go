@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetPromoByProductID(t *testing.T) {
+func TestPromoRepoImpl_GetPromoByProductID(t *testing.T) {
 	testCases := []struct {
 		name          string
 		productID     int64
