@@ -6,6 +6,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/stretchr/testify v1.8.2
+	go.uber.org/dig v1.16.1
 )
 
 require (

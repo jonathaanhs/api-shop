@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/dig"
 )
 
 type (
@@ -21,7 +22,8 @@ type (
 	}
 
 	PromoRepoImpl struct {
-		DB *sqlx.DB
+		dig.In
+		*sqlx.DB
 	}
 )
 
