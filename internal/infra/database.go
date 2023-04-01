@@ -1,10 +1,10 @@
 package infra
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/dig"
 
@@ -14,7 +14,7 @@ import (
 type (
 	Databases struct {
 		dig.Out
-		Pg *sql.DB
+		Pg *sqlx.DB
 	}
 
 	DatabaseCfgs struct {
@@ -41,12 +41,12 @@ func NewDatabases(cfgs DatabaseCfgs) Databases {
 	}
 }
 
-func openPostgres(p *DatabaseCfg) *sql.DB {
+func openPostgres(p *DatabaseCfg) *sqlx.DB {
 	conn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		p.DBUser, p.DBPass, p.Host, p.Port, p.DBName,
 	)
-	db, err := sql.Open("postgres", conn)
+	db, err := sqlx.Open("postgres", conn)
 	if err != nil {
 		logrus.Fatalf("postgres: %s", err.Error())
 	}
