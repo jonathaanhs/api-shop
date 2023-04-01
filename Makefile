@@ -3,6 +3,9 @@ test:
 	go clean -testcache
 	go test ./... --cover
 
+run: 
+	go run cmd/main.go 
+
 run-pg:
 	docker-compose -f ./deploy/pg.yaml up --build -d
 
