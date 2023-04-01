@@ -7,4 +7,4 @@ INSERT INTO products (sku,"name",price,qty) VALUES
 INSERT INTO promos (product_id,promo_type,reward,min_qty) VALUES
 	 (1,'product'::promo_type_enum,1.000,3),
 	 (2,'product'::promo_type_enum,4.000,1),
-	 (3,'discount'::promo_type_enum,10.000,4);
+	 (3,'discount'::promo_type_enum,10.000,3);
