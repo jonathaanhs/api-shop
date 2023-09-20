@@ -3,7 +3,6 @@ package repo_test
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"errors"
 	"testing"
 	"time"
@@ -155,25 +154,12 @@ func TestOrderRepoImpl_CreateOrderDetails(t *testing.T) {
 }
 
 func TestOrderRepoImpl_BeginTx(t *testing.T) {
-	type mockExpectations struct {
-		query    string
-		args     []driver.Value
-		rowCount int
-		err      error
-	}
-
 	tests := []struct {
 		name          string
-		mockExpect    mockExpectations
 		expectedError error
 	}{
 		{
-			name: "successful begin transaction",
-			mockExpect: mockExpectations{
-				query: "BEGIN",
-				args:  []driver.Value{},
-				err:   nil,
-			},
+			name:          "successful begin transaction",
 			expectedError: nil,
 		},
 	}
@@ -184,7 +170,6 @@ func TestOrderRepoImpl_BeginTx(t *testing.T) {
 			defer db.Close()
 
 			mock.ExpectBegin()
-			mock.ExpectExec(tt.mockExpect.query).WithArgs(tt.mockExpect.args...).WillReturnResult(sqlmock.NewResult(0, int64(tt.mockExpect.rowCount))).WillReturnError(tt.mockExpect.err)
 
 			orderRepo := repo.NewOrderRepository(repo.OrderRepoImpl{DB: sqlx.NewDb(db, "sqlmock")})
 
@@ -192,6 +177,86 @@ func TestOrderRepoImpl_BeginTx(t *testing.T) {
 			assert.Equal(t, tt.expectedError, err)
 			if err == nil {
 				tx.Rollback()
+			}
+		})
+	}
+}
+
+func TestOrderRepoImpl_RollbackTx(t *testing.T) {
+	tests := []struct {
+		name          string
+		expectedError error
+	}{
+		{
+			name:          "successful rollback transaction",
+			expectedError: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			assert.NoError(t, err)
+
+			defer db.Close()
+
+			sqlxDb := sqlx.NewDb(db, "sqlmock")
+
+			mock.ExpectBegin()
+			mock.ExpectRollback()
+
+			tx, err := sqlxDb.Beginx()
+			if err != nil {
+				t.Fatalf("failed to begin transaction: %v", err)
+			}
+
+			orderRepo := &repo.OrderRepoImpl{DB: sqlxDb}
+			err = orderRepo.RollbackTx(tx)
+			assert.Equal(t, tt.expectedError, err)
+
+			err = mock.ExpectationsWereMet()
+			if err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestOrderRepoImpl_CommitTx(t *testing.T) {
+	tests := []struct {
+		name          string
+		expectedError error
+	}{
+		{
+			name:          "successful commit transaction",
+			expectedError: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			assert.NoError(t, err)
+
+			defer db.Close()
+
+			sqlxDb := sqlx.NewDb(db, "sqlmock")
+
+			mock.ExpectBegin()
+			mock.ExpectCommit()
+
+			tx, err := sqlxDb.Beginx()
+			if err != nil {
+				t.Fatalf("failed to begin transaction: %v", err)
+			}
+
+			orderRepo := &repo.OrderRepoImpl{DB: sqlxDb}
+			err = orderRepo.CommitTx(tx)
+			assert.Equal(t, tt.expectedError, err)
+
+			err = mock.ExpectationsWereMet()
+			if err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
 			}
 		})
 	}
