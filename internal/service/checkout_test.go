@@ -42,10 +42,6 @@ func TestCheckout(t *testing.T) {
 
 				orderRepo.On("BeginTx").Return(tx, nil)
 				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
-				mocksql.ExpectCommit()
-				tx.Commit()
-
 				productRepo.On("GetProductByProductID", mock.Anything, mock.Anything).Return(repo.Product{
 					ProductID: 3,
 					Sku:       "A304SD",
@@ -61,6 +57,10 @@ func TestCheckout(t *testing.T) {
 					Reward:    10,
 					MinQty:    3,
 				}, nil)
+
+				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
+				mocksql.ExpectCommit()
+				tx.Commit()
 
 			},
 			expectedResp: service.Checkout{
@@ -89,10 +89,6 @@ func TestCheckout(t *testing.T) {
 
 				orderRepo.On("BeginTx").Return(tx, nil)
 				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
-				mocksql.ExpectCommit()
-				tx.Commit()
-
 				productRepo.On("GetProductByProductID", mock.Anything, mock.Anything).Return(repo.Product{
 					ProductID: 1,
 					Sku:       "120P90",
@@ -108,6 +104,9 @@ func TestCheckout(t *testing.T) {
 					Reward:    1,
 					MinQty:    3,
 				}, nil)
+				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
+				mocksql.ExpectCommit()
+				tx.Commit()
 
 			},
 			expectedResp: service.Checkout{
@@ -136,10 +135,6 @@ func TestCheckout(t *testing.T) {
 
 				orderRepo.On("BeginTx").Return(tx, nil)
 				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
-				mocksql.ExpectCommit()
-				tx.Commit()
-
 				productRepo.On("GetProductByProductID", context.TODO(), int64(2)).Return(repo.Product{
 					ProductID: 2,
 					Sku:       "43N23P",
@@ -163,6 +158,9 @@ func TestCheckout(t *testing.T) {
 					Price:     30.000,
 					Qty:       2,
 				}, nil)
+				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
+				mocksql.ExpectCommit()
+				tx.Commit()
 
 			},
 			expectedResp: service.Checkout{
@@ -278,10 +276,6 @@ func TestCheckout(t *testing.T) {
 
 				orderRepo.On("BeginTx").Return(tx, nil)
 				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(errors.New("error"))
-				mocksql.ExpectCommit()
-				tx.Commit()
-
 				productRepo.On("GetProductByProductID", context.TODO(), int64(2)).Return(repo.Product{
 					ProductID: 2,
 					Sku:       "43N23P",
@@ -305,7 +299,7 @@ func TestCheckout(t *testing.T) {
 					Price:     30.000,
 					Qty:       2,
 				}, nil)
-
+				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(errors.New("error"))
 			},
 			expectedResp: service.Checkout{
 				Items:       []string{"MacBook Pro", "Raspberry Pi B"},
@@ -339,8 +333,6 @@ func TestCheckout(t *testing.T) {
 					Reward:    4,
 					MinQty:    1,
 				}, errors.New("error"))
-				mocksql.ExpectCommit()
-				tx.Commit()
 			},
 			expectedResp: service.Checkout{},
 			wantErr:      true,
@@ -378,8 +370,7 @@ func TestCheckout(t *testing.T) {
 					Price:     5399.990,
 					Qty:       1,
 				}, errors.New("error"))
-				mocksql.ExpectCommit()
-				tx.Commit()
+
 			},
 			expectedResp: service.Checkout{},
 			wantErr:      true,
@@ -425,8 +416,7 @@ func TestCheckout(t *testing.T) {
 					Qty:       2,
 				}, nil)
 				productRepo.On("UpdateProductQtyByProductID", mock.Anything, mock.Anything, mock.Anything).Return(errors.New("error"))
-				mocksql.ExpectCommit()
-				tx.Commit()
+
 			},
 			expectedResp: service.Checkout{
 				Items:       []string{"MacBook Pro", "Raspberry Pi B"},
@@ -474,8 +464,7 @@ func TestCheckout(t *testing.T) {
 					Price:     30.000,
 					Qty:       2,
 				}, errors.New("error"))
-				mocksql.ExpectCommit()
-				tx.Commit()
+
 			},
 			expectedResp: service.Checkout{
 				Items:       []string{"MacBook Pro", "Raspberry Pi B"},
