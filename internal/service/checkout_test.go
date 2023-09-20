@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	mockRepo "github.com/learn/api-shop/internal/generated/mock"
 	"github.com/learn/api-shop/internal/repo"
@@ -31,17 +30,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				productRepo.On("GetProductByProductID", mock.Anything, mock.Anything).Return(repo.Product{
 					ProductID: 3,
 					Sku:       "A304SD",
@@ -58,9 +50,8 @@ func TestCheckout(t *testing.T) {
 					MinQty:    3,
 				}, nil)
 
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
-				mocksql.ExpectCommit()
-				tx.Commit()
+				orderRepo.On("CreateOrderDetails", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				orderRepo.On("CommitTx", mock.Anything).Return(nil)
 
 			},
 			expectedResp: service.Checkout{
@@ -78,17 +69,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				productRepo.On("GetProductByProductID", mock.Anything, mock.Anything).Return(repo.Product{
 					ProductID: 1,
 					Sku:       "120P90",
@@ -104,10 +88,9 @@ func TestCheckout(t *testing.T) {
 					Reward:    1,
 					MinQty:    3,
 				}, nil)
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
-				mocksql.ExpectCommit()
-				tx.Commit()
+				orderRepo.On("CreateOrderDetails", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
+				orderRepo.On("CommitTx", mock.Anything).Return(nil)
 			},
 			expectedResp: service.Checkout{
 				Items:       []string{"Google Home", "Google Home", "Google Home"},
@@ -124,17 +107,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				productRepo.On("GetProductByProductID", context.TODO(), int64(2)).Return(repo.Product{
 					ProductID: 2,
 					Sku:       "43N23P",
@@ -158,9 +134,8 @@ func TestCheckout(t *testing.T) {
 					Price:     30.000,
 					Qty:       2,
 				}, nil)
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(nil)
-				mocksql.ExpectCommit()
-				tx.Commit()
+				orderRepo.On("CreateOrderDetails", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				orderRepo.On("CommitTx", mock.Anything).Return(nil)
 
 			},
 			expectedResp: service.Checkout{
@@ -178,17 +153,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				promoRepo.On("GetPromoByProductID", mock.Anything, mock.Anything).Return(repo.Promo{
 					PromoID:   2,
 					PromoType: "discount",
@@ -202,8 +170,6 @@ func TestCheckout(t *testing.T) {
 					Price:     5399.990,
 					Qty:       1,
 				}, nil)
-				mocksql.ExpectCommit()
-				tx.Commit()
 			},
 			expectedResp: service.Checkout{},
 			wantErr:      true,
@@ -217,16 +183,7 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
-
-				orderRepo.On("BeginTx").Return(tx, errors.New("error"))
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, errors.New("error"))
 			},
 			expectedResp: service.Checkout{},
 			wantErr:      true,
@@ -240,17 +197,11 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), errors.New("error"))
+				orderRepo.On("BeginTx").Return(mock.Anything, nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), errors.New("error"))
 
 			},
 			expectedResp: service.Checkout{},
@@ -265,17 +216,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				productRepo.On("GetProductByProductID", context.TODO(), int64(2)).Return(repo.Product{
 					ProductID: 2,
 					Sku:       "43N23P",
@@ -299,7 +243,7 @@ func TestCheckout(t *testing.T) {
 					Price:     30.000,
 					Qty:       2,
 				}, nil)
-				orderRepo.On("CreateOrderDetails", tx, mock.Anything, mock.Anything).Return(errors.New("error"))
+				orderRepo.On("CreateOrderDetails", mock.Anything, mock.Anything, mock.Anything).Return(errors.New("error"))
 			},
 			expectedResp: service.Checkout{
 				Items:       []string{"MacBook Pro", "Raspberry Pi B"},
@@ -316,17 +260,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				promoRepo.On("GetPromoByProductID", mock.Anything, mock.Anything).Return(repo.Promo{
 					PromoID:   2,
 					PromoType: "product",
@@ -346,17 +283,11 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("BeginTx").Return(mock.Anything, nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				promoRepo.On("GetPromoByProductID", mock.Anything, mock.Anything).Return(repo.Promo{
 					PromoID:   2,
 					PromoType: "discount",
@@ -384,17 +315,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				promoRepo.On("GetPromoByProductID", mock.Anything, mock.Anything).Return(repo.Promo{
 					PromoID:   2,
 					PromoType: "product",
@@ -433,17 +357,10 @@ func TestCheckout(t *testing.T) {
 				},
 			},
 			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
-				db, mocksql, err := sqlmock.New()
-				assert.NoError(t, err)
-				sqlxDb := sqlx.NewDb(db, "sqlmock")
-				mocksql.ExpectBegin()
-				tx, err := sqlxDb.Beginx()
-				if err != nil {
-					t.Fatalf("failed to begin transaction: %v", err)
-				}
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
 
-				orderRepo.On("BeginTx").Return(tx, nil)
-				orderRepo.On("CreateOrder", tx, mock.Anything, mock.Anything).Return(int64(1), nil)
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
 				promoRepo.On("GetPromoByProductID", mock.Anything, mock.Anything).Return(repo.Promo{
 					PromoID:   2,
 					PromoType: "product",

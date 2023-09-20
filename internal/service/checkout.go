@@ -40,7 +40,7 @@ func (c *CheckoutUsecaseImpl) Checkout(ctx context.Context, form []repo.OrderDet
 		return res, err
 	}
 
-	defer tx.Rollback()
+	defer c.OrderRepo.RollbackTx(tx)
 
 	orderID, err := c.createOrder(tx, ctx, &res)
 	if err != nil {
@@ -60,7 +60,7 @@ func (c *CheckoutUsecaseImpl) Checkout(ctx context.Context, form []repo.OrderDet
 		return res, err
 	}
 
-	tx.Commit()
+	c.OrderRepo.CommitTx(tx)
 
 	return res, nil
 }

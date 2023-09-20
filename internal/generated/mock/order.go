@@ -42,6 +42,20 @@ func (_m *OrderRepository) BeginTx() (*sqlx.Tx, error) {
 	return r0, r1
 }
 
+// CommitTx provides a mock function with given fields: tx
+func (_m *OrderRepository) CommitTx(tx *sqlx.Tx) error {
+	ret := _m.Called(tx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*sqlx.Tx) error); ok {
+		r0 = rf(tx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateOrder provides a mock function with given fields: tx, ctx, form
 func (_m *OrderRepository) CreateOrder(tx *sqlx.Tx, ctx context.Context, form repo.Order) (int64, error) {
 	ret := _m.Called(tx, ctx, form)
@@ -73,6 +87,20 @@ func (_m *OrderRepository) CreateOrderDetails(tx *sqlx.Tx, ctx context.Context, 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*sqlx.Tx, context.Context, []repo.OrderDetail) error); ok {
 		r0 = rf(tx, ctx, form)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// RollbackTx provides a mock function with given fields: tx
+func (_m *OrderRepository) RollbackTx(tx *sqlx.Tx) error {
+	ret := _m.Called(tx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*sqlx.Tx) error); ok {
+		r0 = rf(tx)
 	} else {
 		r0 = ret.Error(0)
 	}

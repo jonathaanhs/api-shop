@@ -17,3 +17,6 @@ migrate-up:
 
 migrate-down:
 	migrate -database "postgresql://dbuser:dbpass@:5432/dbname?sslmode=disable" -path ./database/pg/migration down
+
+generate-mock:
+	@PROJECT_DIR=${PWD} go generate ./...

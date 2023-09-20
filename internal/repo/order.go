@@ -1,3 +1,4 @@
+//go:generate mockery --dir=$PROJECT_DIR/internal/repo  --name=OrderRepository --filename=$GOFILE --output=$PROJECT_DIR/internal/generated/mock --outpkg=mock
 package repo
 
 import (
@@ -30,6 +31,8 @@ type (
 		CreateOrder(tx *sqlx.Tx, ctx context.Context, form Order) (orderID int64, err error)
 		CreateOrderDetails(tx *sqlx.Tx, ctx context.Context, form []OrderDetail) (err error)
 		BeginTx() (tx *sqlx.Tx, err error)
+		RollbackTx(tx *sqlx.Tx) (err error)
+		CommitTx(tx *sqlx.Tx) (err error)
 	}
 
 	OrderRepoImpl struct {
@@ -83,4 +86,12 @@ func (r *OrderRepoImpl) CreateOrderDetails(tx *sqlx.Tx, ctx context.Context, for
 
 func (r *OrderRepoImpl) BeginTx() (tx *sqlx.Tx, err error) {
 	return r.DB.Beginx()
+}
+
+func (r *OrderRepoImpl) RollbackTx(tx *sqlx.Tx) (err error) {
+	return tx.Rollback()
+}
+
+func (r *OrderRepoImpl) CommitTx(tx *sqlx.Tx) (err error) {
+	return tx.Commit()
 }
