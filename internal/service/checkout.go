@@ -114,40 +114,37 @@ func (c *CheckoutUsecaseImpl) calculatePriceAndRewards(ctx context.Context, item
 		res.Items = append(res.Items, productDetail.Name)
 	}
 
+	var promotion Promotion
+
 	if v.Qty >= promo.MinQty {
 		switch promo.PromoType {
 		case "product":
-			err := c.calculateProductPromo(item, v, productDetail, promo, res)
-			if err != nil {
-				return err
-			}
+			promotion = c.calculateProductPromo(item, v, productDetail, promo, res)
 		case "discount":
-			c.calculateDiscountPromo(item, v, productDetail, promo)
-
+			promotion = &DiscountPromo{}
 		}
-	}
-	return nil
-}
 
-func (c *CheckoutUsecaseImpl) calculateProductPromo(item *repo.OrderDetail, v repo.OrderDetail, productDetail *repo.Product, promo *repo.Promo, res *Checkout) error {
-	if v.ProductID == int64(promo.Reward) {
-		tmpQty := v.Qty - 1
-		item.Price = float64(tmpQty) * productDetail.Price
-	} else {
-		productRewardDetail, err := c.ProductRepo.GetProductByProductID(context.Background(), int64(promo.Reward))
+		item.PromoID = promo.PromoID
+	}
+
+	if promotion != nil {
+		err := promotion.ApplyPromotion(item, v, productDetail, promo, res)
 		if err != nil {
-			log.Printf("error while do GetProductByProductID %+v", err)
 			return err
 		}
-		res.Items = append(res.Items, productRewardDetail.Name)
 	}
-	item.PromoID = promo.PromoID
+
 	return nil
 }
 
-func (c *CheckoutUsecaseImpl) calculateDiscountPromo(item *repo.OrderDetail, v repo.OrderDetail, productDetail *repo.Product, promo *repo.Promo) {
-	item.Price = (productDetail.Price * float64(v.Qty)) - ((productDetail.Price * float64(v.Qty)) * (promo.Reward / 100))
-	item.PromoID = promo.PromoID
+func (c *CheckoutUsecaseImpl) calculateProductPromo(item *repo.OrderDetail, v repo.OrderDetail, productDetail *repo.Product, promo *repo.Promo, res *Checkout) Promotion {
+	if v.ProductID == int64(promo.Reward) {
+		return &ProductPromoDiscount{}
+	}
+
+	return &ProductPromoFree{
+		ProductRepo: c.ProductRepo,
+	}
 }
 
 func (c *CheckoutUsecaseImpl) updateProductQty(ctx context.Context, tx *sqlx.Tx, v repo.OrderDetail) error {
