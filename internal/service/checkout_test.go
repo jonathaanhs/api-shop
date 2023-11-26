@@ -99,6 +99,65 @@ func TestCheckout(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Buy 3 Google Homes for the price of 2 and Buying more than 3 Alexa Speakers will have a 10% discount on all Alexa speakers",
+			orderDetails: []repo.OrderDetail{
+				{
+					ProductID: 1,
+					Qty:       3,
+				},
+				{
+					ProductID: 3,
+					Qty:       3,
+				},
+			},
+			mockSetupFunc: func(orderRepo *mockRepo.OrderRepository, productRepo *mockRepo.ProductRepository, promoRepo *mockRepo.PromoRepository) {
+				orderRepo.On("BeginTx").Return(&sqlx.Tx{}, nil)
+				defer orderRepo.On("RollbackTx", mock.Anything).Return(nil)
+
+				orderRepo.On("CreateOrder", mock.Anything, mock.Anything, mock.Anything).Return(int64(1), nil)
+				productRepo.On("GetProductByProductID", context.Background(), int64(1)).Return(repo.Product{
+					ProductID: 1,
+					Sku:       "120P90",
+					Name:      "Google Home",
+					Price:     49.990,
+					Qty:       10,
+				}, nil)
+				productRepo.On("UpdateProductQtyByProductID", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+				promoRepo.On("GetPromoByProductID", context.Background(), int64(1)).Return(repo.Promo{
+					PromoID:   1,
+					PromoType: "product",
+					Reward:    1,
+					MinQty:    3,
+				}, nil)
+
+				productRepo.On("GetProductByProductID", context.Background(), int64(3)).Return(repo.Product{
+					ProductID: 3,
+					Sku:       "A304SD",
+					Name:      "Alexa Speaker",
+					Price:     109.500,
+					Qty:       10,
+				}, nil)
+				productRepo.On("UpdateProductQtyByProductID", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+				promoRepo.On("GetPromoByProductID", context.Background(), int64(3)).Return(repo.Promo{
+					PromoID:   3,
+					PromoType: "discount",
+					Reward:    10,
+					MinQty:    3,
+				}, nil)
+
+				orderRepo.On("CreateOrderDetails", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+				orderRepo.On("CommitTx", mock.Anything).Return(nil)
+			},
+			expectedResp: service.Checkout{
+				Items:       []string{"Google Home", "Google Home", "Google Home", "Alexa Speaker", "Alexa Speaker", "Alexa Speaker"},
+				TotalAmount: 395.63,
+			},
+			wantErr: false,
+		},
+		{
 			name: "Each sale of a MacBook Pro comes with a free Raspberry Pi B",
 			orderDetails: []repo.OrderDetail{
 				{
