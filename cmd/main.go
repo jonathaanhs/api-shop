@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"cloud.google.com/go/profiler"
 	"github.com/joho/godotenv"
 	"github.com/learn/api-shop/internal"
 	"github.com/learn/api-shop/internal/controller"
@@ -44,6 +45,13 @@ func main() {
 }
 
 func startApp(di *dig.Container) error {
+	if err := profiler.Start(profiler.Config{
+		Service:        "api-shop",
+		ServiceVersion: "1.0",
+	}); err != nil {
+		log.Fatalf("Cannot start the profiler: %v", err)
+	}
+
 	go func() {
 		if err := di.Invoke(internal.Start); err != nil {
 			log.Fatalf("start: %s\n", err)
